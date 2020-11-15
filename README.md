@@ -8,3 +8,4 @@ official touchscreen.
 * Shows examples of colors and the graphic character set
 * Animates particles on the screen, bouncing around
 * Creates new particles when you touch the screen
+* Hit ESC to stop

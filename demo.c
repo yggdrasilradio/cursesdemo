@@ -45,6 +45,31 @@ struct particle particles[100] = {
 	{ 46, 15, 1, -1, BLUE },
 };
 
+int findTouch() {
+
+	FILE *fp;
+	char *p, line[255];
+	int found, r;
+
+	r = 0;
+	found = FALSE;
+	fp = fopen("/proc/bus/input/devices", "r");
+	while (fgets(line, sizeof(line), fp)) {
+		if (strstr(line, "raspberrypi-ts") != NULL)
+			found = TRUE;
+		if (found) {
+			p = strstr(line, "event");
+			if (p != NULL) {
+				r = p[5] - '0';
+				fclose(fp);
+				return r;
+			}
+		}
+	}
+	fclose(fp);
+	return r;
+}
+
 struct particle *Find_Particle(int x, int y) {
 
 	int i, n;
@@ -369,6 +394,8 @@ void draw_box(int x, int y, int w, int h) {
 int main() {
 
 	int c, x, y, n, i, newx, newy, done, touchx, touchy, line, col;
+	int event;
+	char ts[30];
 	char *grid[] = {
 	"1---2---2---3",
 	"| X |   | O |",
@@ -380,7 +407,8 @@ int main() {
 	};
 
 	// open touchscreen
-	fd = open("/dev/input/event4", O_RDONLY);
+	sprintf(ts, "/dev/input/event%d", findTouch());
+	fd = open(ts, O_RDONLY);
 
 	// initialize screen and colorsets
 	init_screen();

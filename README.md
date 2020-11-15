@@ -1,6 +1,8 @@
 cursesdemo
 =============
 
+![](image0.jpg)
+
 Demo of ncurses programming in C for a Raspberry Pi using the
 official touchscreen.
 

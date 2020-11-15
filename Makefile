@@ -7,5 +7,5 @@ all: $(TARGET)
 $(TARGET): $(OBJ)
 	sudo cc -o $(TARGET) $(CFLAGS) $(OBJ)
 
-test.o: test.c
+demo.o: demo.c
 

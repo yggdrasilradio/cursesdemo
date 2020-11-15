@@ -81,7 +81,7 @@ void Add_Particle(int x, int y) {
 			p->x = x;
 			p->y = y;
 
-			// generate random dx and dy
+			// generate random motion
 			while (p->dx == 0 & p->dy == 0) {
 				p->dx = Random(1, 3) - 2;
 				p->dy = Random(1, 3) - 2;
@@ -159,6 +159,12 @@ void Animate_Particles() {
 		if (ch != ' ') {
 			dx = -p->dx;
 			dy = -p->dy;
+			ch = mvinch(y + dy, x + dx);
+			if (ch != ' ') {
+				dx = 0;
+				dy = 0;
+			}
+
 		}
 		x = x + dx;
 		y = y + dy;
@@ -246,13 +252,13 @@ void init_screen() {
 
 	// init colorsets
 	start_color();
-	init_color(COLOR_RED, 1000, 0, 0);
 	init_color(COLOR_GREEN, 0, 1000, 0);
-	init_color(COLOR_BLUE, 0, 0, 1000);
 	init_color(COLOR_YELLOW, 1000, 1000, 0);
+	init_color(COLOR_RED, 1000, 0, 0);
 	init_color(COLOR_WHITE, 1000, 1000, 1000);
 	init_color(COLOR_MAGENTA, 1000, 0, 1000);
 	init_color(COLOR_CYAN, 0, 1000, 1000);
+	init_color(COLOR_BLUE, 0, 0, 1000);
 
 	init_pair(1, COLOR_GREEN, COLOR_BLACK);
 	init_pair(2, COLOR_YELLOW, COLOR_BLACK);

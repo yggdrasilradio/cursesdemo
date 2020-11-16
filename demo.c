@@ -52,22 +52,25 @@ int findTouch() {
 	int found, r;
 
 	r = 0;
-	found = FALSE;
 	fp = fopen("/proc/bus/input/devices", "r");
-	while (fgets(line, sizeof(line), fp)) {
-		if (strstr(line, "raspberrypi-ts") != NULL)
-			found = TRUE;
-		if (found) {
-			p = strstr(line, "event");
-			if (p != NULL) {
-				r = p[5] - '0';
-				fclose(fp);
-				return r;
+	if (fp != NULL) {
+		found = FALSE;
+		while (fgets(line, sizeof(line), fp)) {
+			if (strstr(line, "raspberrypi-ts") != NULL)
+				found = TRUE;
+			else if (found) {
+				p = strstr(line, "event");
+				if (p != NULL) {
+					r = p[5] - '0';
+					fclose(fp);
+					return r;
+				}
 			}
 		}
+		fclose(fp);
 	}
-	fclose(fp);
-	return r;
+	fprintf(stderr, "No touchscreen found\n");
+	exit(0);
 }
 
 struct particle *Find_Particle(int x, int y) {

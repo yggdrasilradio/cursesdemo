@@ -212,17 +212,10 @@ long getTouch(int *x, int *y) {
 	int i, rb, n, rv;
 	static int xval = -1, yval = -1;
 	struct input_event *p, ev[64];
-	fd_set set;
-	struct timeval timeout;
 
-	FD_ZERO(&set);
-	FD_SET(fd, &set);
-	timeout.tv_sec = 0;
-	timeout.tv_usec = 10000;
-	rv = select(fd + 1, &set, NULL, NULL, &timeout);
-	if (rv <= 0)
-		return FALSE;
 	rb = read(fd, ev, sizeof(struct input_event) * 64);
+	if (rb <= 1)
+		return FALSE;
 	n = rb / sizeof(struct input_event);
 	for (i = 0; i < n; i++) {
 		p = &ev[i];
@@ -261,9 +254,9 @@ void init_timer() {
 	struct itimerval timer;
 
 	timer.it_value.tv_sec = 0;
-	timer.it_value.tv_usec = 100000;
+	timer.it_value.tv_usec = 70000;
 	timer.it_interval.tv_sec = 0;
-	timer.it_interval.tv_usec = 100000;
+	timer.it_interval.tv_usec = 70000;
 	setitimer(ITIMER_REAL, &timer, 0);
 	signal(SIGALRM, timer_handler);
 }
@@ -411,7 +404,7 @@ int main() {
 
 	// open touchscreen
 	sprintf(ts, "/dev/input/event%d", findTouch());
-	fd = open(ts, O_RDONLY);
+	fd = open(ts, O_RDONLY | O_NONBLOCK );
 
 	// initialize screen and colorsets
 	init_screen();
@@ -449,9 +442,8 @@ int main() {
 	while (!done) {
 
 		// read keyboard
-		timeout(100);
-		c = getch();
 		timeout(0);
+		c = getch();
 		newx = x;
 		newy = y;
 		switch (c) {
@@ -483,28 +475,29 @@ int main() {
 			x = newx;
 			y = newy;
 
-		} else {
+		}
 
-			// read touchscreen
-			if (getTouch(&touchx, &touchy)) {
+		// read touchscreen
+		if (getTouch(&touchx, &touchy)) {
 
-				// coordinates of touch
-				line = touchy / 23.95;
-				col = touchx /  11.2535211;
+			// coordinates of touch
+			line = touchy / 23.95;
+			col = touchx /  11.2535211;
 
-				// if there's nothing there
-				if (mvinch(line, col) == ' ')
+			// if there's nothing there
+			if (mvinch(line, col) == ' ')
 
-					// add particle
-					Add_Particle(col, line);
-
-			}
-
-			// update particles
-			if (tick)
-				Animate_Particles();
+				// add particle
+				Add_Particle(col, line);
 
 		}
+
+		// update particles
+		if (tick) {
+			tick = 0;
+			Animate_Particles();
+		}
+
 	}
 
 	// close screen

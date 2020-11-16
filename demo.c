@@ -45,6 +45,22 @@ struct particle particles[100] = {
 	{ 46, 15, 1, -1, BLUE },
 };
 
+int Count_Particles() {
+
+	int i, n, r;
+	struct particle *p;
+
+	
+	r = 0;
+	n =  sizeof(particles) / sizeof(particles[0]);
+	for (i = 0; i < n; i++) {
+		p = &particles[i];
+		if (p->x != 0 && p->y != 0)
+			r++;
+	}
+	return r;
+}
+
 int findTouch() {
 
 	FILE *fp;
@@ -498,6 +514,8 @@ int main() {
 			Animate_Particles();
 		}
 
+		// show particle count
+		mvprintw(1, 33, "%d particles", Count_Particles());
 	}
 
 	// close screen

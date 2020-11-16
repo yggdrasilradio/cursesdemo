@@ -214,7 +214,7 @@ void Animate_Particles() {
 		y = y + dy;
 		color = p->color;
 		attron(COLOR_PAIR(color));
-		mvaddch(y, x, ACS_BOARD);
+		mvaddch(y, x, ACS_CKBOARD);
 		attroff(COLOR_PAIR(color));
 		p->x = x;
 		p->y = y;
@@ -450,7 +450,7 @@ int main() {
 	x = COLS - 2;
 	y = 1;
 	attron(COLOR_PAIR(GREEN));
-	mvaddch(y, x, ACS_BOARD);
+	mvaddch(y, x, ACS_CKBOARD);
 	attroff(COLOR_PAIR(GREEN));
 
 	// animation loop
@@ -486,7 +486,7 @@ int main() {
 			// update cursor
 			mvaddch(y, x, ' ');
 			attron(COLOR_PAIR(GREEN));
-			mvaddch(newy, newx, ACS_BOARD);
+			mvaddch(newy, newx, ACS_CKBOARD);
 			attroff(COLOR_PAIR(GREEN));
 			x = newx;
 			y = newy;

@@ -67,7 +67,7 @@ int findTouch() {
 	char *p, line[255];
 	int found, r;
 
-	r = 0;
+	r = -1;
 	fp = fopen("/proc/bus/input/devices", "r");
 	if (fp != NULL) {
 		found = FALSE;
@@ -85,8 +85,7 @@ int findTouch() {
 		}
 		fclose(fp);
 	}
-	fprintf(stderr, "No touchscreen found\n");
-	exit(0);
+	return r;
 }
 
 struct particle *Find_Particle(int x, int y) {
@@ -406,7 +405,7 @@ void draw_box(int x, int y, int w, int h) {
 int main() {
 
 	int c, x, y, n, i, newx, newy, done, touchx, touchy, line, col;
-	int event;
+	int id;
 	char ts[30];
 	char *grid[] = {
 	"1---2---2---3",
@@ -419,8 +418,11 @@ int main() {
 	};
 
 	// open touchscreen
-	sprintf(ts, "/dev/input/event%d", findTouch());
-	fd = open(ts, O_RDONLY | O_NONBLOCK );
+	id = findTouch();
+	if (id >= 0) {
+		sprintf(ts, "/dev/input/event%d", id);
+		fd = open(ts, O_RDONLY | O_NONBLOCK );
+	}
 
 	// initialize screen and colorsets
 	init_screen();
@@ -494,18 +496,20 @@ int main() {
 		}
 
 		// read touchscreen
-		if (getTouch(&touchx, &touchy)) {
+		if (id >= 0) {
+			if (getTouch(&touchx, &touchy)) {
 
-			// coordinates of touch
-			line = touchy / 23.95;
-			col = touchx /  11.2535211;
+				// coordinates of touch
+				line = touchy / 23.95;
+				col = touchx /  11.2535211;
 
-			// if there's nothing there
-			if (mvinch(line, col) == ' ')
+				// if there's nothing there
+				if (mvinch(line, col) == ' ')
 
-				// add particle
-				Add_Particle(col, line);
+					// add particle
+					Add_Particle(col, line);
 
+			}
 		}
 
 		// update particles
@@ -527,7 +531,8 @@ int main() {
 	endwin();
 
 	// close touchscreen
-	close(fd);
+	if (id >= 0)
+		close(fd);
 
 	return 0;
 }

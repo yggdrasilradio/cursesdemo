@@ -500,7 +500,9 @@ int main() {
 			if (getTouch(&touchx, &touchy)) {
 
 				// coordinates of touch
+				// (480 - 1) / (21 - 1) = 23.95
 				line = touchy / 23.95;
+				// (800 - 1) / ( 72 - 1) = 11.2535211
 				col = touchx /  11.2535211;
 
 				// if there's nothing there

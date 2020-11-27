@@ -107,7 +107,7 @@ int Random(int lower, int upper) {
 	return (rand() % (upper - lower + 1)) + lower;
 }
 
-void Add_Particle(int x, int y) {
+void Add_Particle(int x, int y, int dx, int dy) {
 
 	int i, n;
 	struct particle *p;
@@ -124,11 +124,9 @@ void Add_Particle(int x, int y) {
 			p->x = x;
 			p->y = y;
 
-			// generate random motion
-			while (p->dx == 0 & p->dy == 0) {
-				p->dx = Random(1, 3) - 2;
-				p->dy = Random(1, 3) - 2;
-			}
+			// generate otion
+			p->dx = dx;
+			p->dy = dy;
 
 			// generate random color
 			p->color = Random(1, 7);
@@ -222,24 +220,39 @@ void Animate_Particles() {
 	}
 }
 
-long getTouch(int *x, int *y) {
+long getTouch(int *x, int *y, int *dx, int *dy) {
 
 	int i, rb, n, rv;
-	static int xval = -1, yval = -1;
+	static int initialx = -1, initialy = -1;
+	static int finalx = -1, finaly = -1;
 	struct input_event *p, ev[64];
 
 	rb = read(fd, ev, sizeof(struct input_event) * 64);
 	if (rb <= 1)
+		// no touchscreen activity
 		return FALSE;
 	n = rb / sizeof(struct input_event);
 	for (i = 0; i < n; i++) {
 		p = &ev[i];
 		if (p->code == BTN_TOUCH && p->value == 0) {
-			if (xval >= 0 && yval >= 0) {
-				*x = xval;
-				*y = yval;
-				xval = -1;
-				yval = -1;
+			// finger has left the touchscreen
+			if (initialx >= 0 && initialy >= 0) {
+
+				*dx = 0;
+				*dy = 0;
+				if (finaly < (initialy - 50))
+					*dy = -1;
+				else if (finaly > (initialy + 50))
+					*dy = 1;
+				if (finalx < (initialx - 50))
+					*dx = -1;
+				else if (finalx > (initialx + 50))
+					*dx = 1;
+				mvprintw(2, 15, "%d %d  ", *dx, *dy);
+				*x = initialx;
+				*y = initialy;
+				initialx = -1;
+				initialy = -1;
 				return TRUE;
 			}
 		}
@@ -247,11 +260,15 @@ long getTouch(int *x, int *y) {
 			switch(p->code) {
 				case ABS_MT_POSITION_X:
 				case ABS_X:
-					xval = p->value;
+					if (initialx < 0)
+						initialx = p->value;
+					finalx = p->value;
 					break;
 				case ABS_MT_POSITION_Y:
 				case ABS_Y:
-					yval = p->value;
+					if (initialy < 0)
+						initialy = p->value;
+					finaly = p->value;
 					break;
 			}
 		}
@@ -405,7 +422,7 @@ void draw_box(int x, int y, int w, int h) {
 int main() {
 
 	int c, x, y, n, i, newx, newy, done, touchx, touchy, line, col;
-	int id;
+	int id, dx, dy;
 	char ts[30];
 	char *grid[] = {
 	"1---2---2---3",
@@ -497,7 +514,7 @@ int main() {
 
 		// read touchscreen
 		if (id >= 0) {
-			if (getTouch(&touchx, &touchy)) {
+			if (getTouch(&touchx, &touchy, &dx, &dy)) {
 
 				// coordinates of touch
 				// (480 - 1) / (21 - 1) = 23.95
@@ -509,7 +526,7 @@ int main() {
 				if (mvinch(line, col) == ' ')
 
 					// add particle
-					Add_Particle(col, line);
+					Add_Particle(col, line, dx, dy);
 
 			}
 		}

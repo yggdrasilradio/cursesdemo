@@ -124,7 +124,7 @@ void Add_Particle(int x, int y, int dx, int dy) {
 			p->x = x;
 			p->y = y;
 
-			// generate otion
+			// generate motion
 			p->dx = dx;
 			p->dy = dy;
 
@@ -248,7 +248,6 @@ long getTouch(int *x, int *y, int *dx, int *dy) {
 					*dx = -1;
 				else if (finalx > (initialx + 50))
 					*dx = 1;
-				mvprintw(2, 15, "%d %d  ", *dx, *dy);
 				*x = initialx;
 				*y = initialy;
 				initialx = -1;

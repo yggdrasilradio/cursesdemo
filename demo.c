@@ -422,6 +422,7 @@ int main() {
 
 	int c, x, y, n, i, newx, newy, done, touchx, touchy, line, col;
 	int id, dx, dy;
+	struct particle *p;
 	char ts[30];
 	char *grid[] = {
 	"1---2---2---3",
@@ -526,6 +527,18 @@ int main() {
 
 					// add particle
 					Add_Particle(col, line, dx, dy);
+
+				else {
+
+					// if there's a particle there
+					p = Find_Particle(col, line);
+					if (p != NULL) {
+
+						// transfer momentum
+						p->dx = dx;
+						p->dy = dy;
+					}
+				}
 
 			}
 		}
